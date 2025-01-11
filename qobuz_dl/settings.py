@@ -65,7 +65,7 @@ class QobuzDLSettings:
             'password': config["DEFAULT"]["password"],
             'default_folder': arguments.directory or config["DEFAULT"]["default_folder"],
             'default_quality': arguments.quality or config["DEFAULT"]["default_quality"],
-            'default_limit': arguments.limit or config["DEFAULT"]["default_limit"],
+            'default_limit': config["DEFAULT"]["default_limit"],
             'no_m3u': arguments.no_m3u or config.getboolean("DEFAULT", "no_m3u"),
             'albums_only': arguments.albums_only or config.getboolean("DEFAULT", "albums_only"),
             'no_fallback': arguments.no_fallback or config.getboolean("DEFAULT", "no_fallback"),
