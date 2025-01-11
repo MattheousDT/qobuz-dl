@@ -10,6 +10,7 @@ from qobuz_dl.color import GREEN, RED, YELLOW
 from qobuz_dl.commands import qobuz_dl_args
 from qobuz_dl.core import QobuzDL
 from qobuz_dl.downloader import DEFAULT_FOLDER, DEFAULT_TRACK
+from settings import QobuzDLSettings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,6 +60,35 @@ def _reset_config(config_file):
     config["DEFAULT"]["folder_format"] = DEFAULT_FOLDER
     config["DEFAULT"]["track_format"] = DEFAULT_TRACK
     config["DEFAULT"]["smart_discography"] = "false"
+    ## tags option
+    config["DEFAULT"]["no_album_artist_tag"] = "false"
+    config["DEFAULT"]["no_album_title_tag"] = "false"
+    config["DEFAULT"]["no_track_artist_tag"] = "false"
+    config["DEFAULT"]["no_track_title_tag"] = "false"
+    config["DEFAULT"]["no_release_date_tag"] = "false"
+    config["DEFAULT"]["no_media_type_tag"] = "false"
+    config["DEFAULT"]["no_genre_tag"] = "false"
+    config["DEFAULT"]["no_track_number_tag"] = "false"
+    config["DEFAULT"]["no_track_total_tag"] = "false"
+    config["DEFAULT"]["no_disc_number_tag"] = "false"
+    config["DEFAULT"]["no_disc_total_tag"] = "false"
+    config["DEFAULT"]["no_composer_tag"] = "false"
+    # Explicit Advisory
+    config["DEFAULT"]["no_explicit_tag"] = "false"
+    config["DEFAULT"]["no_copyright_tag"] = "false"
+    config["DEFAULT"]["no_label_tag"] = "false"
+    # UPC / Barcode
+    config["DEFAULT"]["no_upc_tag"] = "false"
+    config["DEFAULT"]["no_isrc_tag"] = "false"
+    # Auto-Fix FLAC Unset MD5s
+    config["DEFAULT"]["fix_md5s"] = "false"
+    # Embedded Artwork Size，options: 50, 100, 150, 300, 600, max, org
+    config["DEFAULT"]["embedded_art_size"] = "600"
+    # Saved Artwork Size，options: 50, 100, 150, 300, 600, max, org
+    config["DEFAULT"]["saved_art_size"] = "org"
+    # prefix
+    config["DEFAULT"]["multiple_disc_prefix"] = "CD"
+    
     with open(config_file, "w") as configfile:
         config.write(configfile)
     logging.info(
@@ -163,6 +193,7 @@ def main():
             pass
         sys.exit(f"{GREEN}The database was deleted.")
 
+    settings = QobuzDLSettings.from_arguments_configparser(arguments, config)
     qobuz = QobuzDL(
         arguments.directory,
         arguments.quality,
@@ -176,6 +207,7 @@ def main():
         folder_format=arguments.folder_format or folder_format,
         track_format=arguments.track_format or track_format,
         smart_discography=arguments.smart_discography or smart_discography,
+        settings=settings,
     )
     qobuz.initialize_client(email, password, app_id, secrets)
 

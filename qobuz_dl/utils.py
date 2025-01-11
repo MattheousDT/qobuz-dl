@@ -2,12 +2,14 @@ import re
 import string
 import os
 import logging
+import subprocess
 import time
 
 from mutagen.mp3 import EasyMP3
 from mutagen.flac import FLAC
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 EXTENSIONS = (".mp3", ".flac")
 
@@ -188,3 +190,98 @@ def get_url_info(url):
         url,
     )
     return r.groups()
+
+
+def get_album_artist(qobuz_album: dict) -> str:
+    """
+    Get the album's main artists from the Qobuz API response.
+    If there are multiple main artists, they are separated by " & ".
+    :param qobuz_album: Qobuz API response.
+    :return: The album's main artists.
+    """
+    try:
+        if not qobuz_album.get("artists"):
+            return qobuz_album.get("artist", {}).get("name", "")
+
+        main_artists = list(filter(lambda a: "main-artist" in a.get("roles", []),
+                                   qobuz_album.get("artists", [])))
+        if len(main_artists) > 1:
+            all_but_last_artist = ", ".join(map(lambda a: a["name"], main_artists[:-1]))
+            last_artist = main_artists[-1]["name"]
+            return f"{all_but_last_artist} & {last_artist}"
+        else:
+            return qobuz_album.get("artist", {}).get("name", "")
+    except Exception as e:
+        logger.error(f"Error getting album artist: {str(e)}")
+        return qobuz_album.get("artist", {}).get("name", "")
+
+
+def clean_filename(filename: str) -> str:
+    """
+    Clean up redundant special characters, spaces, and separators in filenames
+    :param filename:
+    :return:
+    """
+    # Clean up redundant spaces, separators, and brackets
+
+    # Merge multiple separators (supports spaces, commas, periods, Chinese commas, colons, semicolons, vertical bars, slashes, backslashes, underscores. Does not support the - symbol) into one
+    filename = re.sub(r'(?:\s*([,\.\:\;\|/\\_])\s*){2,}', r'\1 ', filename)
+
+    # Define all paired bracket patterns
+    patterns = [
+        # Handle paired brackets containing only special characters
+        (r'\(\s*\W*\s*\)', ''),  # (...)
+        (r'\[\s*\W*\s*\]', ''),  # [...]
+        (r'\{\s*\W*\s*\}', ''),  # {...}
+        (r'<\s*\W*\s*>', ''),  # <...>
+        (r'《\s*\W*\s*》', ''),  # 《...》
+        (r'〈\s*\W*\s*〉', ''),  # 〈...〉
+        (r'「\s*\W*\s*」', ''),  # 「...」
+        (r'『\s*\W*\s*』', ''),  # 『...』
+        (r'（\s*\W*\s*）', ''),  # （...）
+        (r'［\s*\W*\s*］', ''),  # ［...］
+        (r'【\s*\W*\s*】', ''),  # 【...】
+
+        # Handle edge cases - remove all special characters and spaces at boundaries
+        # If a left bracket is followed by a separator, or a separator is followed by a right bracket, remove them
+        (r'(?<=[\(\[\{<《〈「『（［【])(\s*[,\.\:\;\|/\\_]\s*)\b', ''),
+        (r'\b(\s*[,\.\:\;\|/\\_]\s*)(?=[】］）』」〉》>\}\]\)])', ''),
+    ]
+
+    # Apply each pattern sequentially
+    for pattern, replacement in patterns:
+        filename = re.sub(pattern, replacement, filename)
+
+    # Merge multiple spaces
+    filename = re.sub(r'\s+', ' ', filename)
+    return filename.strip().strip(".").strip()
+
+
+def _run_cmd(command):
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout, stderr = process.communicate()
+    return process.returncode, stdout, stderr
+
+def flac_fix_md5s(flac_file_path: str) -> bool:
+    """
+    Fix the MD5s of FLAC files by re-encoding them with the -sf8 option.
+    :param flac_file_path: Path to the FLAC file.
+    :return: True if successful, False otherwise
+    """
+    if not os.path.isfile(flac_file_path):
+        logger.error(f"File not found: {flac_file_path}")
+        return False
+        
+    logger.info(f"Fixing MD5s in {flac_file_path}")
+    md5sum_cmd = f'flac -sf8 "{flac_file_path}"'
+    logger.debug(f"Running command: {md5sum_cmd}")
+    
+    returncode, stdout, stderr = _run_cmd(md5sum_cmd)
+    if returncode == 0:
+        if stderr.strip():  # 如果有警告信息
+            logger.warning(stderr.strip())
+        return True
+    else:
+        logger.error(f'Error: md5sum command failed with return code {returncode}')
+        logger.error(f'Error: {stderr.strip()}')
+        return False
