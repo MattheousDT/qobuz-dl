@@ -46,10 +46,14 @@ def _get_title_with_version(title: str = "", version: str = "") -> str:
     :param version:
     :return:
     """
+    item_title = title
     if version:
-        return f"{title} ({version})"
-    else:
-        return title
+        item_title = (
+            f"{title} ({version})"
+            if version.lower() not in title.lower()
+            else title
+        )
+    return item_title
 
 
 def _get_title(track_dict):

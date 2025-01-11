@@ -227,9 +227,13 @@ class Download:
 
         # Determine the filename
         track_title = track_metadata.get("title")
-        track_version = track_metadata.get("version")
-        artist = _safe_get(track_metadata, "performer", "name")
-        filename_attr = self._get_filename_attr(artist, track_metadata, f'{track_title} ({track_version})' if track_version else track_title)
+        track_artist = _safe_get(track_metadata, "performer", "name")
+        
+        filename_attr = self._get_filename_attr(
+            track_artist,
+            track_metadata,
+            album_or_track_metadata.get("album", {}) if is_track else album_or_track_metadata
+        )
 
         # track_format is a format string
         # e.g. '{tracknumber}. {trackartist} - {tracktitle}'
@@ -257,21 +261,20 @@ class Download:
             logger.error(f"{RED}Error tagging the file: {e}", exc_info=True)
 
     @staticmethod
-    def _get_filename_attr(artist, track_metadata, track_title):
-        album_meta = track_metadata.get("album", {})
+    def _get_filename_attr(track_artist, track_metadata: dict, album_metadata: dict):
         return {
-            "album_title":  _get_title(album_meta),
-            "album_artist": get_album_artist(album_meta) if get_album_artist(album_meta) else artist,
+            "album_title":  _get_title(album_metadata),
+            "album_artist": get_album_artist(album_metadata) if get_album_artist(album_metadata) else track_artist,
             "track_id": track_metadata.get("id"),
-            "track_artist": artist,
+            "track_artist": track_artist,
             "track_composer": _safe_get(track_metadata,"composer", "name"),
             "track_number": f'{track_metadata.get("track_number"):02}',
             "isrc": track_metadata.get("isrc"),
             "bit_depth": track_metadata.get("maximum_bit_depth"),
             "sampling_rate": track_metadata.get("maximum_sampling_rate"),
-            "track_title": track_title,
+            "track_title": _get_title(track_metadata),
             "version": track_metadata.get("version"),
-            "year": track_metadata["release_date_original"].split("-")[0],
+            "year": track_metadata.get("release_date_original").split("-")[0],
             "disc_number": track_metadata.get("media_number"),
             "release_date": track_metadata.get("release_date_original"),
         }
@@ -392,17 +395,17 @@ def _get_description(item: dict, track_title, multiple=None):
 
 def _get_title(item_dict):
     """
-    Get the title of the album with version if available.
+    Get the title of the album/track with version if available.
     """
-    album_title = item_dict["title"]
+    item_title = item_dict.get("title")
     version = item_dict.get("version")
     if version:
-        album_title = (
-            f"{album_title} ({version})"
-            if version.lower() not in album_title.lower()
-            else album_title
+        item_title = (
+            f"{item_title} ({version})"
+            if version.lower() not in item_title.lower()
+            else item_title
         )
-    return album_title
+    return item_title
 
 
 def _get_extra(item, dirn, extra="cover.jpg", art_size=None):
