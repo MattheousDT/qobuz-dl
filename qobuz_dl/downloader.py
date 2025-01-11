@@ -228,7 +228,7 @@ class Download:
         # Determine the filename
         track_title = track_metadata.get("title")
         track_artist = _safe_get(track_metadata, "performer", "name")
-        
+
         filename_attr = self._get_filename_attr(
             track_artist,
             track_metadata,

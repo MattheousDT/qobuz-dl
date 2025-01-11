@@ -246,9 +246,11 @@ def _get_tags_to_add(qobuz_album: dict, qobuz_item : dict, settings: QobuzDLSett
 
     # Basic Information
     if not settings.no_album_title_tag:
-        tags["ALBUM"] = _get_title_with_version(**qobuz_album)
+        tags["ALBUM"] = _get_title_with_version(title=qobuz_album.get("title", ""),
+                                                version=qobuz_album.get("version", ""))
     if not settings.no_track_title_tag:
-        tags["TITLE"] = _get_title_with_version(**qobuz_item)
+        tags["TITLE"] = _get_title_with_version(title=qobuz_item.get("title", ""),
+                                                version=qobuz_item.get("version", ""))
 
     # Artist Information
     if not settings.no_album_artist_tag:
