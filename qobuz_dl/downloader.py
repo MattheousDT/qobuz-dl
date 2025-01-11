@@ -288,7 +288,7 @@ class Download:
             "album_genre": meta.get("genre", {}).get("name"),
             "album_composer": meta.get("composer", {}).get("name"),
             # Qobuz sometimes has multiple spaces in place of where a single space should be when it comes to Labels
-            "label": re.sub(r'\s+',' ', meta.get("label")),
+            "label": re.sub(r'\s+',' ', meta.get("label",{}).get("name")),
             "copyright": meta.get("copyright"),
             "upc": meta.get("upc"),
             "barcode": meta.get("upc"),
@@ -313,7 +313,7 @@ class Download:
             "album_genre": meta.get("genre", {}).get("name"),
             "album_composer": meta.get("composer", {}).get("name"),
             # Qobuz sometimes has multiple spaces in place of where a single space should be when it comes to Labels
-            "label": re.sub(r'\s+',' ', meta.get("label")),
+            "label": re.sub(r'\s+',' ', meta.get("label",{}).get("name")),
             "copyright": meta.get("copyright"),
             "upc": meta.get("upc"),
             "barcode": meta.get("upc"),

@@ -265,7 +265,8 @@ def _get_tags_to_add(qobuz_album: dict, qobuz_item : dict, settings: QobuzDLSett
     if not settings.no_label_tag:
         tags["COPYRIGHT"] = _format_copyright(qobuz_album.get("copyright", "n/a"))
     if not settings.no_label_tag:
-        tags["LABEL"] = qobuz_album.get("label", {}).get("name", "n/a")
+        # Qobuz sometimes has multiple spaces in place of where a single space should be when it comes to Labels
+        tags["LABEL"] = re.sub(r'\s+',' ', qobuz_album.get("label", {}).get("name", ""))
     if not settings.no_isrc_tag:
         tags["ISRC"] = qobuz_item.get("isrc", "")
     if not settings.no_upc_tag:
