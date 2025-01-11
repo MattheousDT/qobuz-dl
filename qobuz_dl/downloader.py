@@ -10,8 +10,8 @@ from tqdm import tqdm
 import qobuz_dl.metadata as metadata
 from qobuz_dl.color import OFF, GREEN, RED, YELLOW, CYAN
 from qobuz_dl.exceptions import NonStreamable
-from settings import QobuzDLSettings
-from utils import get_album_artist, clean_filename
+from qobuz_dl.settings import QobuzDLSettings
+from qobuz_dl.utils import get_album_artist, clean_filename
 
 QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 # used in case of error

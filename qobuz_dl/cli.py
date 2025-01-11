@@ -10,7 +10,7 @@ from qobuz_dl.color import GREEN, RED, YELLOW
 from qobuz_dl.commands import qobuz_dl_args
 from qobuz_dl.core import QobuzDL
 from qobuz_dl.downloader import DEFAULT_FOLDER, DEFAULT_TRACK
-from settings import QobuzDLSettings
+from qobuz_dl.settings import QobuzDLSettings
 
 logging.basicConfig(
     level=logging.INFO,

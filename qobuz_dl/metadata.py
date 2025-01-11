@@ -5,8 +5,8 @@ import logging
 from mutagen.flac import FLAC, Picture
 import mutagen.id3 as id3
 from mutagen.id3 import ID3NoHeaderError
-from settings import QobuzDLSettings
-from utils import get_album_artist, flac_fix_md5s
+from qobuz_dl.settings import QobuzDLSettings
+from qobuz_dl.utils import get_album_artist, flac_fix_md5s
 
 logger = logging.getLogger(__name__)
 

@@ -19,7 +19,7 @@ from qobuz_dl.utils import (
     create_and_return_dir,
     PartialFormatter,
 )
-from settings import QobuzDLSettings
+from qobuz_dl.settings import QobuzDLSettings
 
 WEB_URL = "https://play.qobuz.com/"
 ARTISTS_SELECTOR = "td.chartlist-artist > a"
