@@ -97,12 +97,12 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         metavar="PATTERN",
         help="""pattern for formatting folder names, e.g
         "{album_artist} - {album_title} ({year}) {{{barcode}}}". available keys: 
-        album_id, album_url, album_title, album_artist, album_genre, album_composer, 
-        label, copyright, upc, barcode, release_date, year, media_type,
+        album_id, album_url, album_title, album_title, album_artist, album_genre, 
+        album_composer, label, copyright, upc, barcode, release_date, year, media_type,
         format, bit_depth, sampling_rate, album_version, disc_count, track_count.
-        Note1: {album_title} will contain version information if available.
-        Note2: {track_title} will contain version information if available. 
-        Note3: {track_title} is only available if the given url is a track url.
+        Note1: {album_title}, {track_title} will contain version information if available.
+        Note2: {album_title_base}, {track_title_base} will contain only the title,
+        Note3: {track_title}, {track_title_base} is only available if the given url is a track url.
         Cannot contain characters used by the system, which includes /:<>""",
     )
     custom_parser.add_argument(
@@ -112,11 +112,11 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         help="""pattern for formatting track names. e.g
         "{track_number} - {track_title}" 
         available keys:
-        album_title, album_artist, track_id, track_artist, track_composer, 
-        track_number, isrc, bit_depth, sampling_rate, track_title,
+        album_title, album_title_base, album_artist, track_id, track_artist, track_composer, 
+        track_number, isrc, bit_depth, sampling_rate, track_title, track_title_base
         version, year, disc_number, release_date.
-        Note1: {album_title} will contain version information if available.
-        Note2: {track_title} will contain version information if available. 
+        Note1: {album_title}, {track_title} will contain version information if available.
+        Note2: {album_title_base}, {track_title_base} will contain only the title.
         Cannot contain characters used by the system, which includes /:<>
         """,
     )
@@ -252,10 +252,21 @@ def add_common_arg(custom_parser, default_folder, default_quality):
     multiple_disc_group.add_argument(
         "--multiple-disc-prefix",
         default="CD",
+        metavar="PREFIX",
         help="""Setting folder prefix for multiple discs album (default: CD)
         If the album has multiple discs(media_count > 1), the album's tracks will be saved by folder.
         The names of the folders: '{prefix} {media_number}', eg: 'CD 01'
         """
+    )
+    multiple_disc_group.add_argument(
+        "--multiple-disc-one-dir",
+        action="store_true",
+        help="store multiple disc releases in one directory",
+    )
+    multiple_disc_group.add_argument(
+        "--multiple-disc-track-format",
+        metavar="FORMAT",
+        help='track format for multiple disc releases (default: "{disc_number}.{track_number} - {track_title}")',
     )
 
 

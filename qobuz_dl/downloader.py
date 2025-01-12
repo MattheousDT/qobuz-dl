@@ -219,7 +219,7 @@ class Download:
             logger.info(f"{OFF}Track not available for download")
             return
 
-        if multiple:
+        if multiple and (not self.settings.multiple_disc_one_dir):
             root_dir = os.path.join(root_dir, f"{self.settings.multiple_disc_prefix} {multiple:02}")
             os.makedirs(root_dir, exist_ok=True)
 
@@ -237,7 +237,11 @@ class Download:
 
         # track_format is a format string
         # e.g. '{tracknumber}. {trackartist} - {tracktitle}'
-        formatted_path = sanitize_filename(clean_filename(self.track_format.format(**filename_attr)), replacement_text="_")
+        if multiple and self.settings.multiple_disc_one_dir:
+            formatted_path = sanitize_filename(clean_filename(self.settings.multiple_disc_track_format.format(**filename_attr)),
+                                               replacement_text="_")
+        else:
+            formatted_path = sanitize_filename(clean_filename(self.track_format.format(**filename_attr)), replacement_text="_")
         final_file = os.path.join(root_dir, formatted_path)[:250] + extension
 
         if os.path.isfile(final_file):
@@ -264,6 +268,7 @@ class Download:
     def _get_filename_attr(track_artist, track_metadata: dict, album_metadata: dict):
         return {
             "album_title":  _get_title(album_metadata),
+            "album_title_base": album_metadata.get("title"),
             "album_artist": get_album_artist(album_metadata) if get_album_artist(album_metadata) else track_artist,
             "track_id": track_metadata.get("id"),
             "track_artist": track_artist,
@@ -273,9 +278,10 @@ class Download:
             "bit_depth": track_metadata.get("maximum_bit_depth"),
             "sampling_rate": track_metadata.get("maximum_sampling_rate"),
             "track_title": _get_title(track_metadata),
+            "track_title_base": track_metadata.get("title"),
             "version": track_metadata.get("version"),
             "year": track_metadata.get("release_date_original").split("-")[0],
-            "disc_number": track_metadata.get("media_number"),
+            "disc_number": f'{track_metadata.get("media_number"):02}',
             "release_date": track_metadata.get("release_date_original"),
         }
 
@@ -284,9 +290,11 @@ class Download:
         album_meta = meta.get("album", {})
         return {
             "track_title": track_title,
+            "track_title_base": meta.get("title"),
             "album_id": meta.get("id"),
             "album_url": meta.get("url"),
             "album_title": _get_title(album_meta),
+            "album_title_base": album_meta.get("title"),
             "album_artist": get_album_artist(album_meta) if get_album_artist(album_meta) else _safe_get(meta, "performer", "name"),
             "album_genre": meta.get("genre", {}).get("name"),
             "album_composer": meta.get("composer", {}).get("name"),
@@ -312,6 +320,7 @@ class Download:
             "album_id": meta.get("id"),
             "album_url": meta.get("url"),
             "album_title": album_title,
+            "album_title_base": meta.get("title"),
             "album_artist": get_album_artist(meta),
             "album_genre": meta.get("genre", {}).get("name"),
             "album_composer": meta.get("composer", {}).get("name"),

@@ -47,6 +47,11 @@ class QobuzDLSettings:
 
         # multiple disc option
         self.multiple_disc_prefix = kwargs.get('multiple_disc_prefix', 'CD')
+        self.multiple_disc_one_dir = kwargs.get('multiple_disc_one_dir', False)
+        self.multiple_disc_track_format = kwargs.get(
+            'multiple_disc_track_format', 
+            '{disc_number}.{track_number} - {track_title}'
+        )
 
     @staticmethod
     def from_arguments_configparser(arguments, config):
@@ -85,6 +90,8 @@ class QobuzDLSettings:
             
             # multiple disc option
             'multiple_disc_prefix': arguments.multiple_disc_prefix or config["DEFAULT"]["multiple_disc_prefix"],
+            'multiple_disc_one_dir': arguments.multiple_disc_one_dir or config.getboolean("DEFAULT", "multiple_disc_one_dir"),
+            'multiple_disc_track_format': arguments.multiple_disc_track_format or config["DEFAULT"]["multiple_disc_track_format"],
             
             # FLAC auto-fix Unset MD5s option
             'fix_md5s': arguments.fix_md5s or config.getboolean("DEFAULT", "fix_md5s"),

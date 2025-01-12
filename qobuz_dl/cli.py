@@ -86,8 +86,10 @@ def _reset_config(config_file):
     config["DEFAULT"]["embedded_art_size"] = "600"
     # Saved Artwork Size，options: 50, 100, 150, 300, 600, max, org
     config["DEFAULT"]["saved_art_size"] = "org"
-    # prefix
+    # multiple disc options
     config["DEFAULT"]["multiple_disc_prefix"] = "CD"
+    config["DEFAULT"]["multiple_disc_one_dir"] = "false"
+    config["DEFAULT"]["multiple_disc_track_format"] = "{disc_number}.{track_number} - {track_title}"
     
     with open(config_file, "w") as configfile:
         config.write(configfile)
