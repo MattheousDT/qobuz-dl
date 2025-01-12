@@ -1,3 +1,107 @@
+# qobuz-dl modified version
+
+## Intro
+This is a modified version of qobuz-dl, new features and fixes are added.
+- Refactored the tags function to support more tags, as well as all tags being configurable.
+- ```folder_format``` and ```track_format``` supports more variables.
+- Add fix md5 checksum option for FLAC.
+- Multiple discs release allows saving to a single directory and supports the use of special filename templates for multiple discs.
+
+## Install
+```bash
+pip3 install git+https://github.com/xwell/qobuz-dl.git
+```
+
+## Usage
+```
+qobuz-dl dl [URL] [OPTIONS]
+```
+**more options:**
+```
+usage: qobuz-dl dl [-h] [-d PATH] [-q int] [--albums-only] [--no-m3u] [--no-fallback] [--no-db] [-ff PATTERN] [-tf PATTERN] [-s] [--no-album-artist-tag] [--no-album-title-tag] [--no-track-artist-tag]
+                   [--no-track-title-tag] [--no-release-date-tag] [--no-media-type-tag] [--no-genre-tag] [--no-track-number-tag] [--no-track-total-tag] [--no-disc-number-tag] [--no-disc-total-tag]
+                   [--no-composer-tag] [--no-explicit-tag] [--no-copyright-tag] [--no-label-tag] [--no-upc-tag] [--no-isrc-tag] [--fix-md5s] [-e] [--og-cover] [--no-cover]
+                   [--embedded-art-size {50,100,150,300,600,max,org}] [--saved-art-size {50,100,150,300,600,max,org}] [--multiple-disc-prefix PREFIX] [--multiple-disc-one-dir]
+                   [--multiple-disc-track-format FORMAT]
+                   SOURCE [SOURCE ...]
+
+Download by album/track/artist/label/playlist/last.fm-playlist URL.
+
+positional arguments:
+  SOURCE                one or more URLs (space separated) or a text file
+
+options:
+  -h, --help            show this help message and exit
+  -d PATH, --directory PATH
+                        directory for downloads (default: "QobuzDownloads")
+  -q int, --quality int
+                        audio "quality" (5, 6, 7, 27) [320, LOSSLESS, 24B<=96KHZ, 24B>96KHZ] (default: 27)
+  --albums-only         don't download singles, EPs and VA releases
+  --no-m3u              don't create .m3u files when downloading playlists
+  --no-fallback         disable quality fallback (skip releases not available in set quality)
+  --no-db               don't call the database
+  -ff PATTERN, --folder-format PATTERN
+                        pattern for formatting folder names, e.g "{album_artist} - {album_title} ({year}) {{{barcode}}}". available keys: album_id, album_url, album_title, album_title, album_artist,
+                        album_genre, album_composer, label, copyright, upc, barcode, release_date, year, media_type, format, bit_depth, sampling_rate, album_version, disc_count, track_count. Note1:
+                        {album_title}, {track_title} will contain version information if available. Note2: {album_title_base}, {track_title_base} will contain only the title, Note3: {track_title},
+                        {track_title_base} is only available if the given url is a track url. Cannot contain characters used by the system, which includes /:<>
+  -tf PATTERN, --track-format PATTERN
+                        pattern for formatting track names. e.g "{track_number} - {track_title}" available keys: album_title, album_title_base, album_artist, track_id, track_artist, track_composer,
+                        track_number, isrc, bit_depth, sampling_rate, track_title, track_title_base version, year, disc_number, release_date. Note1: {album_title}, {track_title} will contain version
+                        information if available. Note2: {album_title_base}, {track_title_base} will contain only the title. Cannot contain characters used by the system, which includes /:<>
+  -s, --smart-discography
+                        Try to filter out spam-like albums when requesting an artist's discography, and other optimizations. Filters albums not made by requested artist, and deluxe/live/collection
+                        albums. Gives preference to remastered albums, high bit depth/dynamic range, and low sampling rates (to save space).
+
+tag options:
+  --no-album-artist-tag
+                        don't add album artist tag
+  --no-album-title-tag  don't add album title tag
+  --no-track-artist-tag
+                        don't add track artist tag
+  --no-track-title-tag  don't add track title tag
+  --no-release-date-tag
+                        don't add release date tag
+  --no-media-type-tag   don't add media type tag
+  --no-genre-tag        don't add genre tag
+  --no-track-number-tag
+                        don't add track number tag
+  --no-track-total-tag  don't add total tracks tag
+  --no-disc-number-tag  don't add disc number tag
+  --no-disc-total-tag   don't add total discs tag
+  --no-composer-tag     don't add composer tag
+  --no-explicit-tag     don't add explicit advisory tag
+  --no-copyright-tag    don't add copyright tag
+  --no-label-tag        don't add label tag
+  --no-upc-tag          don't add UPC/barcode tag
+  --no-isrc-tag         don't add ISRC tag
+
+FLAC options:
+  --fix-md5s            fix FLAC MD5 checksums
+
+cover artwork options:
+  -e, --embed-art       embed cover art into audio files
+  --og-cover            download cover art in its original quality (bigger file). No longer available, recommended use: --embedded-art-size and --saved-art-size
+  --no-cover            don't download cover art
+  --embedded-art-size {50,100,150,300,600,max,org}
+                        size of embedded artwork (default: 600)
+  --saved-art-size {50,100,150,300,600,max,org}
+                        size of saved artwork (default: org)
+
+multiple disc options:
+  --multiple-disc-prefix PREFIX
+                        Setting folder prefix for multiple discs album (default: CD) If the album has multiple discs(media_count > 1), the album's tracks will be saved by folder. The names of the
+                        folders: '{prefix} {media_number}', eg: 'CD 01'
+  --multiple-disc-one-dir
+                        store multiple disc releases in one directory
+  --multiple-disc-track-format FORMAT
+                        track format for multiple disc releases (default: "{disc_number}.{track_number} - {track_title}")
+```
+
+---
+The original document is below.
+---
+
 # qobuz-dl
 Search, explore and download Lossless and Hi-Res music from [Qobuz](https://www.qobuz.com/).
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VZWSWVGZGJRMU&source=url)
