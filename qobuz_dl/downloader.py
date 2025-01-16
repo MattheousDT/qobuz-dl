@@ -12,6 +12,7 @@ from qobuz_dl.color import OFF, GREEN, RED, YELLOW, CYAN
 from qobuz_dl.exceptions import NonStreamable
 from qobuz_dl.settings import QobuzDLSettings
 from qobuz_dl.utils import get_album_artist, clean_filename
+from qobuz_dl.db import handle_download_id
 
 QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 # used in case of error
@@ -49,6 +50,7 @@ class Download:
         folder_format=None,
         track_format=None,
         settings: QobuzDLSettings = None,
+        download_db=None,
     ):
         self.client = client
         self.item_id = item_id
@@ -62,6 +64,7 @@ class Download:
         self.folder_format = folder_format or DEFAULT_FOLDER
         self.track_format = track_format or DEFAULT_TRACK
         self.settings = settings or QobuzDLSettings()
+        self.download_db = download_db
 
 
     def download_id_by_type(self, track=True):
@@ -142,6 +145,10 @@ class Download:
             count = count + 1
         # clean embed_art jpg
         _clean_embed_art(dirn, self.settings)
+        # add download info to log
+        handle_download_id(db_path=self.download_db, item_id=self.item_id, add_id=True, media_type="album",
+                           quality=self.quality, file_format=file_format, quality_met=quality_met,
+                           bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn)
         logger.info(f"{GREEN}Completed")
 
     def download_track(self):
@@ -196,6 +203,10 @@ class Download:
             )
             # clean embed_art jpg
             _clean_embed_art(dirn, self.settings)
+            # add download info to log
+            handle_download_id(db_path=self.download_db, item_id=self.item_id, add_id=True, media_type="track",
+                               quality=self.quality, file_format=file_format, quality_met=quality_met,
+                               bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn)
         else:
             logger.info(f"{OFF}Demo. Skipping")
         logger.info(f"{GREEN}Completed")
