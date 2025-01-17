@@ -3,7 +3,7 @@ class QobuzDLSettings:
         # basic options
         self.email = kwargs.get('email')
         self.password = kwargs.get('password')
-        self.default_folder = kwargs.get('default_folder', 'Qobuz Downloads')
+        self.default_folder = kwargs.get('default_folder', 'QobuzDownloads')
         self.default_quality = kwargs.get('default_quality', 6)
         self.default_limit = kwargs.get('default_limit', 20)
         self.no_m3u = kwargs.get('no_m3u', False)

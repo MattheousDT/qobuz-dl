@@ -34,8 +34,8 @@ def _reset_config(config_file):
     password = input("Enter your password\n- ")
     config["DEFAULT"]["password"] = hashlib.md5(password.encode("utf-8")).hexdigest()
     config["DEFAULT"]["default_folder"] = (
-        input("Folder for downloads (leave empty for default 'Qobuz Downloads')\n- ")
-        or "Qobuz Downloads"
+        input("Folder for downloads (leave empty for default 'QobuzDownloads')\n- ")
+        or "QobuzDownloads"
     )
     config["DEFAULT"]["default_quality"] = (
         input(
@@ -50,7 +50,7 @@ def _reset_config(config_file):
     config["DEFAULT"]["albums_only"] = "false"
     config["DEFAULT"]["no_fallback"] = "false"
     config["DEFAULT"]["og_cover"] = "false"
-    config["DEFAULT"]["embed_art"] = "false"
+    config["DEFAULT"]["embed_art"] = "true"
     config["DEFAULT"]["no_cover"] = "false"
     config["DEFAULT"]["no_database"] = "false"
     logging.info(f"{YELLOW}Getting tokens. Please wait...")

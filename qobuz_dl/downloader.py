@@ -27,7 +27,7 @@ DEFAULT_FORMATS = {
     ],
 }
 
-DEFAULT_FOLDER = "{album_artist} - {album_title} ({year}) [{bit_depth}B-{sampling_rate}kHz]"
+DEFAULT_FOLDER = "{album_artist} - {album_title} ({year}) {{{label}, {upc}}} [WEB {format} {bit_depth}-{sampling_rate}]"
 DEFAULT_TRACK = "{track_number} - {track_title}"
 EMB_COVER_NAME = "embed_cover.jpg"
 
