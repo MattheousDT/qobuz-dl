@@ -67,6 +67,7 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         "-q",
         "--quality",
         metavar="int",
+        type=int,
         default=default_quality,
         choices=[5, 6, 7, 27],
         help=(
