@@ -53,6 +53,9 @@ class QobuzDLSettings:
             '{disc_number}.{track_number} - {track_title}'
         )
 
+        # Add parallel download thread count option
+        self.max_workers = int(kwargs.get('max_workers', 3))
+
     @staticmethod
     def from_arguments_configparser(arguments, config):
         """Creating Configuration Objects from Command Line Parameters and Configuration Files
@@ -114,6 +117,9 @@ class QobuzDLSettings:
             'no_label_tag': arguments.no_label_tag or config.getboolean("DEFAULT", "no_label_tag"),
             'no_upc_tag': arguments.no_upc_tag or config.getboolean("DEFAULT", "no_upc_tag"),
             'no_isrc_tag': arguments.no_isrc_tag or config.getboolean("DEFAULT", "no_isrc_tag"),
+            
+            # Add parallel download thread count configuration
+            'max_workers': arguments.max_workers or config["DEFAULT"]["max_workers"],
         }
         
         return QobuzDLSettings(**kwargs)

@@ -271,6 +271,15 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         help='track format for multiple disc releases (default: "{disc_number}.{track_number} - {track_title}")',
     )
 
+    # Add parallel download thread count argument group
+    parallel_group = custom_parser.add_argument_group('parallel download options')
+    parallel_group.add_argument(
+        "--max-workers",
+        type=int,
+        metavar="N",
+        help="maximum number of parallel downloads (default: 3)",
+    )
+
 
 def qobuz_dl_args(
     default_quality=6, default_limit=20, default_folder="QobuzDownloads"

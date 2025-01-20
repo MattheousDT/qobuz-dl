@@ -2,6 +2,8 @@ import logging
 import os
 import re
 from typing import Tuple
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
@@ -126,23 +128,34 @@ class Download:
             _download_goodies(album_meta, dirn)
         media_numbers = [track["media_number"] for track in album_meta["tracks"]["items"]]
         is_multiple = True if len([*{*media_numbers}]) > 1 else False
-        for i in album_meta["tracks"]["items"]:
-            parse = self.client.get_track_url(i["id"], fmt_id=self.quality)
-            if "sample" not in parse and parse["sampling_rate"]:
-                is_mp3 = True if int(self.quality) == 5 else False
-                self._download_and_tag(
-                    dirn,
-                    count,
-                    parse,
-                    i,
-                    album_meta,
-                    False,
-                    is_mp3,
-                    i["media_number"] if is_multiple else None,
-                )
-            else:
-                logger.info(f"{OFF}Demo. Skipping")
-            count = count + 1
+        
+        # 使用配置的max_workers
+        with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
+            futures = []
+            for i in album_meta["tracks"]["items"]:
+                parse = self.client.get_track_url(i["id"], fmt_id=self.quality)
+                if "sample" not in parse and parse["sampling_rate"]:
+                    is_mp3 = True if int(self.quality) == 5 else False
+                    futures.append(
+                        executor.submit(
+                            self._download_and_tag,
+                            dirn,
+                            count,
+                            parse,
+                            i,
+                            album_meta,
+                            False,
+                            is_mp3,
+                            i["media_number"] if is_multiple else None,
+                        )
+                    )
+                else:
+                    logger.info(f"{OFF}Demo. Skipping")
+                count = count + 1
+                
+            # 等待所有下载完成
+            concurrent.futures.wait(futures)
+            
         # clean embed_art jpg
         _clean_embed_art(dirn, self.settings)
         # add download info to log
