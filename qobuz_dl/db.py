@@ -20,6 +20,8 @@ def create_db(db_path):
               "sampling_rate" text,
               "saved_path" text NOT NULL DEFAULT '',
               "status" text NOT NULL DEFAULT 'downloaded',
+              "url" text NOT NULL DEFAULT '',
+              "release_date" text NOT NULL DEFAULT '',
               PRIMARY KEY ("id", "quality")
             );
             """)
@@ -30,7 +32,8 @@ def create_db(db_path):
 
 
 def handle_download_id(db_path, item_id, add_id=False, media_type='album', quality=27, file_format='FLAC',
-                       quality_met=0, bit_depth=None, sampling_rate=None, saved_path='', status='downloaded'):
+                       quality_met=0, bit_depth=None, sampling_rate=None, saved_path='', status='downloaded',
+                       url='', release_date=''):
     if not db_path:
         return
 
@@ -42,9 +45,9 @@ def handle_download_id(db_path, item_id, add_id=False, media_type='album', quali
                 conn.execute(
                     """
                     INSERT INTO downloads (id, media_type, quality, file_format, quality_met, bit_depth, 
-                    sampling_rate, saved_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    sampling_rate, saved_path, url, release_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                     (item_id, media_type, quality, file_format, quality_met, bit_depth, sampling_rate,
-                     saved_path, status),
+                     saved_path, url, release_date, status),
                 )
                 conn.commit()
             except sqlite3.Error as e:

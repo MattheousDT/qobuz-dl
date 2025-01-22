@@ -91,6 +91,9 @@ class Download:
 
         album_title = _get_title(album_meta)
 
+        url = album_meta.get("url", "")
+        release_date = album_meta.get("release_date_original", "")
+
         format_info = self._get_format(album_meta)
         file_format, quality_met, bit_depth, sampling_rate = format_info
 
@@ -161,7 +164,8 @@ class Download:
         # add download info to log
         handle_download_id(db_path=self.download_db, item_id=self.item_id, add_id=True, media_type="album",
                            quality=self.quality, file_format=file_format, quality_met=quality_met,
-                           bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn)
+                           bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn,
+                           url=url, release_date=release_date)
         logger.info(f"{GREEN}Completed")
 
     def download_track(self):
@@ -172,6 +176,8 @@ class Download:
             track_title = _get_title(track_meta)
             artist = _safe_get(track_meta, "performer", "name")
             logger.info(f"\n{YELLOW}Downloading: {artist} - {track_title}")
+            url = track_meta("album", {}).get("url", "")
+            release_date = track_meta.get("release_date_original", "")
             format_info = self._get_format(track_meta, is_track_id=True, track_url_dict=parse)
             file_format, quality_met, bit_depth, sampling_rate = format_info
 
@@ -219,7 +225,8 @@ class Download:
             # add download info to log
             handle_download_id(db_path=self.download_db, item_id=self.item_id, add_id=True, media_type="track",
                                quality=self.quality, file_format=file_format, quality_met=quality_met,
-                               bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn)
+                               bit_depth=bit_depth, sampling_rate=sampling_rate, saved_path=dirn,
+                               url=url, release_date=release_date)
         else:
             logger.info(f"{OFF}Demo. Skipping")
         logger.info(f"{GREEN}Completed")
