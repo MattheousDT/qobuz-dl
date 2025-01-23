@@ -132,7 +132,7 @@ class Download:
         media_numbers = [track["media_number"] for track in album_meta["tracks"]["items"]]
         is_multiple = True if len([*{*media_numbers}]) > 1 else False
         
-        # 使用配置的max_workers
+        # Use the configured max_workers value
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             futures = []
             for i in album_meta["tracks"]["items"]:
@@ -156,7 +156,7 @@ class Download:
                     logger.info(f"{OFF}Demo. Skipping")
                 count = count + 1
                 
-            # 等待所有下载完成
+            # wait for all downloads to complete
             concurrent.futures.wait(futures)
             
         # clean embed_art jpg
