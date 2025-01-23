@@ -254,7 +254,31 @@ def clean_filename(filename: str) -> str:
 
     # Merge multiple spaces
     filename = re.sub(r'\s+', ' ', filename)
-    return filename.strip().strip(".").strip()
+    return invalid_chars_to_fullwidth(filename.strip().strip(".").strip())
+
+
+def invalid_chars_to_fullwidth(filename):
+    """
+    Convert illegal characters in filenames to full-width characters
+    :param filename:
+    :return:
+    """
+    # Illegal characters to full-width characters
+    invalid_to_fullwidth = {
+        '/': '／',
+        '\\': '＼',
+        ':': '：',
+        '*': '＊',
+        '?': '？',
+        '"': '＂',
+        '<': '＜',
+        '>': '＞',
+        '|': '｜',
+    }
+
+    for invalid_char, fullwidth_char in invalid_to_fullwidth.items():
+        filename = filename.replace(invalid_char, fullwidth_char)
+    return filename
 
 
 def _run_cmd(command):
