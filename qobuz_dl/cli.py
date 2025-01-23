@@ -92,6 +92,8 @@ def _reset_config(config_file):
     config["DEFAULT"]["multiple_disc_track_format"] = "{disc_number}.{track_number} - {track_title}"
     # Add parallel download thread count option
     config["DEFAULT"]["max_workers"] = "3"
+    # user_auth_token
+    config["DEFAULT"]["user_auth_token"] = ""
     
     with open(config_file, "w") as configfile:
         config.write(configfile)

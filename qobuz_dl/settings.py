@@ -56,6 +56,9 @@ class QobuzDLSettings:
         # Add parallel download thread count option
         self.max_workers = int(kwargs.get('max_workers', 3))
 
+        # user_auth_token
+        self.user_auth_token = kwargs.get('user_auth_token', '')
+
     @staticmethod
     def from_arguments_configparser(arguments, config):
         """Creating Configuration Objects from Command Line Parameters and Configuration Files
@@ -120,6 +123,9 @@ class QobuzDLSettings:
             
             # Add parallel download thread count configuration
             'max_workers': arguments.max_workers or config["DEFAULT"]["max_workers"],
+
+            # user_auth_token
+            'user_auth_token': config["DEFAULT"]["user_auth_token"],
         }
         
         return QobuzDLSettings(**kwargs)

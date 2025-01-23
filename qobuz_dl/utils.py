@@ -302,7 +302,7 @@ def flac_fix_md5s(flac_file_path: str) -> bool:
     
     returncode, stdout, stderr = _run_cmd(md5sum_cmd)
     if returncode == 0:
-        if stderr.strip():  # 如果有警告信息
+        if stderr.strip():
             logger.warning(stderr.strip())
         return True
     else:
