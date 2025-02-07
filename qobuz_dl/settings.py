@@ -1,3 +1,5 @@
+from qobuz_dl.downloader import DEFAULT_FOLDER, DEFAULT_TRACK
+
 class QobuzDLSettings:
     def __init__(self, **kwargs):
         # basic options
@@ -72,60 +74,60 @@ class QobuzDLSettings:
         """
         # basic options
         kwargs = {
-            'email': config["DEFAULT"]["email"],
-            'password': config["DEFAULT"]["password"],
-            'default_folder': arguments.directory or config["DEFAULT"]["default_folder"],
-            'default_quality': arguments.quality or config["DEFAULT"]["default_quality"],
-            'default_limit': config["DEFAULT"]["default_limit"],
-            'no_m3u': arguments.no_m3u or config.getboolean("DEFAULT", "no_m3u"),
-            'albums_only': arguments.albums_only or config.getboolean("DEFAULT", "albums_only"),
-            'no_fallback': arguments.no_fallback or config.getboolean("DEFAULT", "no_fallback"),
-            'no_database': arguments.no_db or config.getboolean("DEFAULT", "no_database"),
-            'app_id': config["DEFAULT"]["app_id"],
-            'secrets': [s for s in config["DEFAULT"]["secrets"].split(",") if s],
-            'folder_format': arguments.folder_format or config["DEFAULT"]["folder_format"],
-            'track_format': arguments.track_format or config["DEFAULT"]["track_format"],
-            'smart_discography': arguments.smart_discography or config.getboolean("DEFAULT", "smart_discography"),
+            'email': config.get("DEFAULT", "email", fallback=""),
+            'password': config.get("DEFAULT", "password", fallback=""),
+            'default_folder': arguments.directory or config.get("DEFAULT", "default_folder", fallback="QobuzDownloads"),
+            'default_quality': arguments.quality or config.get("DEFAULT", "default_quality", fallback="6"),
+            'default_limit': config.get("DEFAULT", "default_limit", fallback="20"),
+            'no_m3u': arguments.no_m3u or config.getboolean("DEFAULT", "no_m3u", fallback=False),
+            'albums_only': arguments.albums_only or config.getboolean("DEFAULT", "albums_only", fallback=False),
+            'no_fallback': arguments.no_fallback or config.getboolean("DEFAULT", "no_fallback", fallback=False),
+            'no_database': arguments.no_db or config.getboolean("DEFAULT", "no_database", fallback=False),
+            'app_id': config.get("DEFAULT", "app_id", fallback=""),
+            'secrets': [s for s in config.get("DEFAULT", "secrets", fallback="").split(",") if s],
+            'folder_format': arguments.folder_format or config.get("DEFAULT", "folder_format", fallback=DEFAULT_FOLDER),
+            'track_format': arguments.track_format or config.get("DEFAULT", "track_format", fallback=DEFAULT_TRACK),
+            'smart_discography': arguments.smart_discography or config.getboolean("DEFAULT", "smart_discography", fallback=False),
             
             # cover options
-            'embed_art': arguments.embed_art or config.getboolean("DEFAULT", "embed_art"),
-            'og_cover': arguments.og_cover or config.getboolean("DEFAULT", "og_cover"),
-            'no_cover': arguments.no_cover or config.getboolean("DEFAULT", "no_cover"),
-            'embedded_art_size': arguments.embedded_art_size or config["DEFAULT"]["embedded_art_size"],
-            'saved_art_size': arguments.saved_art_size or config["DEFAULT"]["saved_art_size"],
+            'embed_art': arguments.embed_art or config.getboolean("DEFAULT", "embed_art", fallback=True),
+            'og_cover': arguments.og_cover or config.getboolean("DEFAULT", "og_cover", fallback=False),
+            'no_cover': arguments.no_cover or config.getboolean("DEFAULT", "no_cover", fallback=False),
+            'embedded_art_size': arguments.embedded_art_size or config.get("DEFAULT", "embedded_art_size", fallback="600"),
+            'saved_art_size': arguments.saved_art_size or config.get("DEFAULT", "saved_art_size", fallback="org"),
             
             # multiple disc option
-            'multiple_disc_prefix': arguments.multiple_disc_prefix or config["DEFAULT"]["multiple_disc_prefix"],
-            'multiple_disc_one_dir': arguments.multiple_disc_one_dir or config.getboolean("DEFAULT", "multiple_disc_one_dir"),
-            'multiple_disc_track_format': arguments.multiple_disc_track_format or config["DEFAULT"]["multiple_disc_track_format"],
+            'multiple_disc_prefix': arguments.multiple_disc_prefix or config.get("DEFAULT", "multiple_disc_prefix", fallback="CD"),
+            'multiple_disc_one_dir': arguments.multiple_disc_one_dir or config.getboolean("DEFAULT", "multiple_disc_one_dir", fallback=False),
+            'multiple_disc_track_format': arguments.multiple_disc_track_format or config.get("DEFAULT", "multiple_disc_track_format", fallback="{disc_number}.{track_number} - {track_title}"),
             
             # FLAC auto-fix Unset MD5s option
-            'fix_md5s': arguments.fix_md5s or config.getboolean("DEFAULT", "fix_md5s"),
+            'fix_md5s': arguments.fix_md5s or config.getboolean("DEFAULT", "fix_md5s", fallback=False),
             
             # tag options
-            'no_album_artist_tag': arguments.no_album_artist_tag or config.getboolean("DEFAULT", "no_album_artist_tag"),
-            'no_album_title_tag': arguments.no_album_title_tag or config.getboolean("DEFAULT", "no_album_title_tag"), 
-            'no_track_artist_tag': arguments.no_track_artist_tag or config.getboolean("DEFAULT", "no_track_artist_tag"),
-            'no_track_title_tag': arguments.no_track_title_tag or config.getboolean("DEFAULT", "no_track_title_tag"),
-            'no_release_date_tag': arguments.no_release_date_tag or config.getboolean("DEFAULT", "no_release_date_tag"),
-            'no_media_type_tag': arguments.no_media_type_tag or config.getboolean("DEFAULT", "no_media_type_tag"),
-            'no_genre_tag': arguments.no_genre_tag or config.getboolean("DEFAULT", "no_genre_tag"),
-            'no_track_number_tag': arguments.no_track_number_tag or config.getboolean("DEFAULT", "no_track_number_tag"),
-            'no_track_total_tag': arguments.no_track_total_tag or config.getboolean("DEFAULT", "no_track_total_tag"),
-            'no_disc_number_tag': arguments.no_disc_number_tag or config.getboolean("DEFAULT", "no_disc_number_tag"),
-            'no_disc_total_tag': arguments.no_disc_total_tag or config.getboolean("DEFAULT", "no_disc_total_tag"),
-            'no_composer_tag': arguments.no_composer_tag or config.getboolean("DEFAULT", "no_composer_tag"),
-            'no_explicit_tag': arguments.no_explicit_tag or config.getboolean("DEFAULT", "no_explicit_tag"),
-            'no_copyright_tag': arguments.no_copyright_tag or config.getboolean("DEFAULT", "no_copyright_tag"),
-            'no_label_tag': arguments.no_label_tag or config.getboolean("DEFAULT", "no_label_tag"),
-            'no_upc_tag': arguments.no_upc_tag or config.getboolean("DEFAULT", "no_upc_tag"),
-            'no_isrc_tag': arguments.no_isrc_tag or config.getboolean("DEFAULT", "no_isrc_tag"),
+            'no_album_artist_tag': arguments.no_album_artist_tag or config.getboolean("DEFAULT", "no_album_artist_tag", fallback=False),
+            'no_album_title_tag': arguments.no_album_title_tag or config.getboolean("DEFAULT", "no_album_title_tag", fallback=False),
+            'no_track_artist_tag': arguments.no_track_artist_tag or config.getboolean("DEFAULT", "no_track_artist_tag", fallback=False),
+            'no_track_title_tag': arguments.no_track_title_tag or config.getboolean("DEFAULT", "no_track_title_tag", fallback=False),
+            'no_release_date_tag': arguments.no_release_date_tag or config.getboolean("DEFAULT", "no_release_date_tag", fallback=False),
+            'no_media_type_tag': arguments.no_media_type_tag or config.getboolean("DEFAULT", "no_media_type_tag", fallback=False),
+            'no_genre_tag': arguments.no_genre_tag or config.getboolean("DEFAULT", "no_genre_tag", fallback=False),
+            'no_track_number_tag': arguments.no_track_number_tag or config.getboolean("DEFAULT", "no_track_number_tag", fallback=False),
+            'no_track_total_tag': arguments.no_track_total_tag or config.getboolean("DEFAULT", "no_track_total_tag", fallback=False),
+            'no_disc_number_tag': arguments.no_disc_number_tag or config.getboolean("DEFAULT", "no_disc_number_tag", fallback=False),
+            'no_disc_total_tag': arguments.no_disc_total_tag or config.getboolean("DEFAULT", "no_disc_total_tag", fallback=False),
+            'no_composer_tag': arguments.no_composer_tag or config.getboolean("DEFAULT", "no_composer_tag", fallback=False),
+            'no_explicit_tag': arguments.no_explicit_tag or config.getboolean("DEFAULT", "no_explicit_tag", fallback=False),
+            'no_copyright_tag': arguments.no_copyright_tag or config.getboolean("DEFAULT", "no_copyright_tag", fallback=False),
+            'no_label_tag': arguments.no_label_tag or config.getboolean("DEFAULT", "no_label_tag", fallback=False),
+            'no_upc_tag': arguments.no_upc_tag or config.getboolean("DEFAULT", "no_upc_tag", fallback=False),
+            'no_isrc_tag': arguments.no_isrc_tag or config.getboolean("DEFAULT", "no_isrc_tag", fallback=False),
             
             # Add parallel download thread count configuration
-            'max_workers': arguments.max_workers or config["DEFAULT"]["max_workers"],
+            'max_workers': arguments.max_workers or config.get("DEFAULT", "max_workers", fallback="3"),
 
             # user_auth_token
-            'user_auth_token': config["DEFAULT"]["user_auth_token"],
+            'user_auth_token': config.get("DEFAULT", "user_auth_token", fallback=""),
         }
         
         return QobuzDLSettings(**kwargs)
