@@ -15,6 +15,7 @@ from qobuz_dl.exceptions import NonStreamable
 from qobuz_dl.settings import QobuzDLSettings
 from qobuz_dl.utils import get_album_artist, clean_filename
 from qobuz_dl.db import handle_download_id
+from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK
 
 QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 # used in case of error
@@ -29,8 +30,6 @@ DEFAULT_FORMATS = {
     ],
 }
 
-DEFAULT_FOLDER = "{album_artist} - {album_title} ({year}) {{{label}, {upc}}} [WEB {format} {bit_depth}-{sampling_rate}]"
-DEFAULT_TRACK = "{track_number} - {track_title}"
 EMB_COVER_NAME = "embed_cover.jpg"
 
 logger = logging.getLogger(__name__)

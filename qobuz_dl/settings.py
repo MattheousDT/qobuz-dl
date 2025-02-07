@@ -1,4 +1,4 @@
-from qobuz_dl.downloader import DEFAULT_FOLDER, DEFAULT_TRACK
+from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK
 
 class QobuzDLSettings:
     def __init__(self, **kwargs):
