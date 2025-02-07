@@ -15,7 +15,7 @@ from qobuz_dl.exceptions import (
     InvalidAppSecretError,
     InvalidQuality,
 )
-from qobuz_dl.color import GREEN, YELLOW
+from qobuz_dl.color import GREEN, YELLOW, RED
 
 RESET = "Reset your credentials with 'qobuz-dl -r'"
 
@@ -48,12 +48,17 @@ class Client:
                     "user_auth_token": kwargs["user_auth_token"],
                     "app_id": self.id,
                 }
+                logger.info(f"{YELLOW}Trying to login with user_auth_token")
             else:
                 params = {
                     "email": kwargs["email"],
                     "password": kwargs["pwd"],
                     "app_id": self.id,
                 }
+                logger.info(f"{YELLOW}Trying to login with email/password")
+            
+            # add debug info
+            logger.info(f"{YELLOW}Login params: {params}")
         elif epoint == "track/get":
             params = {"track_id": kwargs["id"]}
         elif epoint == "album/get":
@@ -129,13 +134,17 @@ class Client:
         return r.json()
 
     def auth(self, email, pwd, user_auth_token):
-        usr_info = self.api_call("user/login", email=email, pwd=pwd, user_auth_token=user_auth_token)
-        if not usr_info["user"]["credential"]["parameters"]:
-            raise IneligibleError("Free accounts are not eligible to download tracks.")
-        self.uat = usr_info["user_auth_token"]
-        self.session.headers.update({"X-User-Auth-Token": self.uat})
-        self.label = usr_info["user"]["credential"]["parameters"]["short_label"]
-        logger.info(f"{GREEN}Membership: {self.label}")
+        try:
+            usr_info = self.api_call("user/login", email=email, pwd=pwd, user_auth_token=user_auth_token)
+            if not usr_info["user"]["credential"]["parameters"]:
+                raise IneligibleError("Free accounts are not eligible to download tracks.")
+            self.uat = usr_info["user_auth_token"]
+            self.session.headers.update({"X-User-Auth-Token": self.uat})
+            self.label = usr_info["user"]["credential"]["parameters"]["short_label"]
+            logger.info(f"{GREEN}Membership: {self.label}")
+        except Exception as e:
+            logger.error(f"{RED}Authentication error: {str(e)}")
+            raise
 
     def multi_meta(self, epoint, key, id, type):
         total = 1
