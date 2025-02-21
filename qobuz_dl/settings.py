@@ -1,4 +1,4 @@
-from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK
+from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK
 
 class QobuzDLSettings:
     def __init__(self, **kwargs):
@@ -15,6 +15,7 @@ class QobuzDLSettings:
         self.app_id = kwargs.get('app_id')
         self.secrets = kwargs.get('secrets')
         self.folder_format = kwargs.get('folder_format')
+        self.fallback_folder_format = kwargs.get('fallback_folder_format', DEFAULT_FOLDER)
         self.track_format = kwargs.get('track_format')
         self.smart_discography = kwargs.get('smart_discography', False)
 
@@ -52,7 +53,7 @@ class QobuzDLSettings:
         self.multiple_disc_one_dir = kwargs.get('multiple_disc_one_dir', False)
         self.multiple_disc_track_format = kwargs.get(
             'multiple_disc_track_format', 
-            '{disc_number}.{track_number} - {track_title}'
+            DEFAULT_MULTIPLE_DISC_TRACK
         )
 
         # Add parallel download thread count option
@@ -86,6 +87,7 @@ class QobuzDLSettings:
             'app_id': config.get("DEFAULT", "app_id", fallback=""),
             'secrets': [s for s in config.get("DEFAULT", "secrets", fallback="").split(",") if s],
             'folder_format': arguments.folder_format or config.get("DEFAULT", "folder_format", fallback=DEFAULT_FOLDER),
+            'fallback_folder_format': arguments.fallback_folder_format or config.get("DEFAULT", "fallback_folder_format", fallback=DEFAULT_FOLDER),
             'track_format': arguments.track_format or config.get("DEFAULT", "track_format", fallback=DEFAULT_TRACK),
             'smart_discography': arguments.smart_discography or config.getboolean("DEFAULT", "smart_discography", fallback=False),
             

@@ -15,7 +15,7 @@ from qobuz_dl.exceptions import NonStreamable
 from qobuz_dl.settings import QobuzDLSettings
 from qobuz_dl.utils import get_album_artist, clean_filename
 from qobuz_dl.db import handle_download_id
-from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK
+from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK, OK_MAX_CHARACTER_LENGTH
 
 QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 # used in case of error
@@ -66,9 +66,19 @@ class Download:
         self.track_format = track_format or DEFAULT_TRACK
         self.settings = settings or QobuzDLSettings()
         self.download_db = download_db
-
+        
+        # Save original formatting settings
+        self._original_folder_format = folder_format or DEFAULT_FOLDER
+        self._original_track_format = track_format or DEFAULT_TRACK
+        self._original_multiple_disc_track_format = settings.multiple_disc_track_format if settings else DEFAULT_MULTIPLE_DISC_TRACK
 
     def download_id_by_type(self, track=True):
+        # Reset to original format
+        self.folder_format = self._original_folder_format
+        self.track_format = self._original_track_format
+        if self.settings:
+            self.settings.multiple_disc_track_format = self._original_multiple_disc_track_format
+        
         if not track:
             self.download_release()
         else:
@@ -109,10 +119,10 @@ class Download:
         album_attr = self._get_album_attr(
             album_meta, album_title, file_format, bit_depth, sampling_rate
         )
-        folder_format, track_format = _clean_format_str(
-            self.folder_format, self.track_format, file_format
-        )
-        sanitized_title = sanitize_filepath(clean_filename(folder_format.format(**album_attr)), replacement_text="_")
+        # If the album track path exceeds 180 characters, use fallback formatting.
+        self._determine_formats(album_meta=album_meta, album_attr=album_attr, tracks_meta=album_meta["tracks"]["items"],
+                                track_attr=None, is_track=False,file_format=file_format, settings=self.settings)
+        sanitized_title = sanitize_filepath(clean_filename(self.folder_format.format(**album_attr)), replacement_text="_")
         dirn = os.path.join(self.path, sanitized_title)
         os.makedirs(dirn, exist_ok=True)
 
@@ -128,8 +138,10 @@ class Download:
 
         if "goodies" in album_meta:
             _download_goodies(album_meta, dirn)
-        media_numbers = [track["media_number"] for track in album_meta["tracks"]["items"]]
-        is_multiple = True if len([*{*media_numbers}]) > 1 else False
+        # media_numbers = [track["media_number"] for track in album_meta["tracks"]["items"]]
+        # is_multiple = True if len([*{*media_numbers}]) > 1 else False
+        media_count = album_meta.get("media_count", 1)
+        is_multiple = True if media_count > 1 else False
         
         # Use the configured max_workers value
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
@@ -193,6 +205,9 @@ class Download:
             track_attr = self._get_track_attr(
                 track_meta, track_title, bit_depth, sampling_rate, file_format
             )
+            # If the track path exceeds 180 characters, use fallback formatting.
+            self._determine_formats(album_meta=track_meta.get("album", {}), album_attr=None, tracks_meta=[track_meta],
+                                    track_attr=track_attr, is_track=True, file_format=file_format, settings=self.settings)
             sanitized_title = sanitize_filepath(clean_filename(folder_format.format(**track_attr)), replacement_text="_")
 
             dirn = os.path.join(self.path, sanitized_title)
@@ -400,6 +415,92 @@ class Download:
             )
         except (KeyError, requests.exceptions.HTTPError):
             return ("Unknown", quality_met, None, None)
+
+
+    def _determine_formats(self, album_meta, album_attr, tracks_meta, track_attr, is_track, file_format, settings: QobuzDLSettings):
+        """
+        Determine appropriate naming formats, ensuring all file paths don't exceed maximum length.
+        Try the following combinations in order of priority:
+        1. folder_format + track_format/multiple_disc_track_format
+        2. fallback_folder_format + track_format/multiple_disc_track_format  
+        3. fallback_folder_format + fallback_track_format/fallback_multiple_disc_track_format
+        4. default_folder_format + default_track_format/fallback_multiple_disc_track_format
+        
+        Note: Format changes only affect current download, not subsequent ones.
+        """
+        # Prepare all possible format combinations
+        format_combinations = [
+            (self._original_folder_format, self._original_track_format, self._original_multiple_disc_track_format),
+            (settings.fallback_folder_format, self._original_track_format, self._original_multiple_disc_track_format),
+            (settings.fallback_folder_format, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK),
+            (DEFAULT_FOLDER, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK)
+        ]
+
+        # Check if it's a multi-disc album
+        media_count = album_meta.get("media_count", 1)
+        is_multiple = True if media_count > 1 else False
+        extension = ".flac" if file_format.lower() == "flac" else ".mp3"
+
+        # Iterate through each format combination until finding a suitable one
+        for folder_fmt, track_fmt, multi_disc_fmt in format_combinations:
+            folder_fmt, track_fmt = _clean_format_str(folder_fmt, track_fmt, file_format)
+            valid_combination = True
+            
+            try:
+                # Get cleaned folder path
+                if is_track:
+                    root_dir = sanitize_filepath(clean_filename(folder_fmt.format(**track_attr)), replacement_text="_")
+                else:
+                    root_dir = sanitize_filepath(clean_filename(folder_fmt.format(**album_attr)), replacement_text="_")
+
+                # Check complete path length for each track
+                for track_metadata in tracks_meta:
+                    track_artist = _safe_get(track_metadata, "performer", "name")
+                    filename_attr = self._get_filename_attr(track_artist, track_metadata, album_meta)
+
+                    curr_root_dir = root_dir
+                    if is_multiple and self.settings.multiple_disc_one_dir:
+                        # Multiple discs in single directory
+                        track_path = sanitize_filename(
+                            clean_filename(multi_disc_fmt.format(**filename_attr)),
+                            replacement_text="_"
+                        )
+                    else:
+                        # Single disc or multiple discs in separate directories
+                        if is_multiple and not self.settings.multiple_disc_one_dir:
+                            disc_dir = f"{self.settings.multiple_disc_prefix} {track_metadata['media_number']:02}"
+                            curr_root_dir = os.path.join(root_dir, disc_dir)
+                        
+                        track_path = sanitize_filename(
+                            clean_filename(track_fmt.format(**filename_attr)),
+                            replacement_text="_"
+                        )
+
+                    final_path = os.path.join(curr_root_dir, track_path + extension)
+                    
+                    if len(final_path) > OK_MAX_CHARACTER_LENGTH:
+                        valid_combination = False
+                        break
+            except (KeyError, ValueError) as e:
+                # Format failed, try next combination
+                logger.debug(f"Format combination failed: {e}")
+                valid_combination = False
+                continue
+
+            if valid_combination:
+                # Found suitable combination, update instance attributes only
+                self.folder_format = folder_fmt
+                self.track_format = track_fmt
+                if self.settings:
+                    self.settings.multiple_disc_track_format = multi_disc_fmt
+                return
+
+        # If no combinations are suitable, use the last (default) combination
+        logger.warning(f"{YELLOW}Path length too long. Using default formats for this item.")
+        self.folder_format = DEFAULT_FOLDER
+        self.track_format = DEFAULT_TRACK
+        if self.settings:
+            self.settings.multiple_disc_track_format = DEFAULT_MULTIPLE_DISC_TRACK
 
 
 def tqdm_download(url, fname, desc):

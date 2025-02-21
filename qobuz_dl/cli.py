@@ -59,6 +59,7 @@ def _reset_config(config_file):
     config["DEFAULT"]["secrets"] = ",".join(bundle.get_secrets().values())
     config["DEFAULT"]["folder_format"] = DEFAULT_FOLDER
     config["DEFAULT"]["track_format"] = DEFAULT_TRACK
+    config["DEFAULT"]["fallback_folder_format"] = DEFAULT_FOLDER
     config["DEFAULT"]["smart_discography"] = "false"
     ## tags option
     config["DEFAULT"]["no_album_artist_tag"] = "false"

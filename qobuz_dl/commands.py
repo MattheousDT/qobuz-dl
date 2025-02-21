@@ -108,6 +108,13 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         Cannot contain characters used by the system, which includes /:<>""",
     )
     custom_parser.add_argument(
+        "-fbff",
+        "--fallback-folder-format",
+        metavar="PATTERN", 
+        help="""fallback pattern for formatting folder names when the main pattern fails.
+        Uses same keys as --folder-format. e.g: "{album_artist} - {album_title}" """,
+    )
+    custom_parser.add_argument(
         "-tf",
         "--track-format",
         metavar="PATTERN",
