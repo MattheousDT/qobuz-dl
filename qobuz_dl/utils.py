@@ -4,6 +4,7 @@ import os
 import logging
 import subprocess
 import time
+import unicodedata
 
 from mutagen.mp3 import EasyMP3
 from mutagen.flac import FLAC
@@ -218,10 +219,14 @@ def get_album_artist(qobuz_album: dict) -> str:
 
 def clean_filename(filename: str) -> str:
     """
-    Clean up redundant special characters, spaces, and separators in filenames
+    Clean up redundant special characters, spaces, separators in filenames
+    and normalize Unicode characters to NFC form
     :param filename:
     :return:
     """
+    # First normalize the Unicode string to NFC form
+    filename = unicodedata.normalize('NFC', filename)
+    
     # Clean up redundant spaces, separators, and brackets
 
     # Merge multiple separators (supports spaces, commas, periods, Chinese commas, colons, semicolons, vertical bars, slashes, backslashes, underscores. Does not support the - symbol) into one
