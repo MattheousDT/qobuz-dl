@@ -5,6 +5,8 @@
 import hashlib
 import logging
 import time
+import unicodedata
+import json
 
 import requests
 
@@ -131,7 +133,21 @@ class Client:
             raise InvalidAppSecretError(f"Invalid app secret: {r.json()}.\n" + RESET)
 
         r.raise_for_status()
-        return r.json()
+        
+        # Unicode Normalization for JSON strings
+        json_data = r.json()
+        return self._normalize_json_strings(json_data)
+
+    def _normalize_json_strings(self, obj):
+        """Recursively normalize Unicode strings in JSON objects (NFC form)"""
+        if isinstance(obj, str):
+            return unicodedata.normalize('NFC', obj)
+        elif isinstance(obj, dict):
+            return {k: self._normalize_json_strings(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._normalize_json_strings(item) for item in obj]
+        else:
+            return obj
 
     def auth(self, email, pwd, user_auth_token):
         try:

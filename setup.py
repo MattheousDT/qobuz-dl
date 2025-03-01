@@ -20,7 +20,7 @@ requirements = [
 
 setup(
     name=pkg_name,
-    version="1.0.7",
+    version="1.0.8",
     author="Vitiko",
     author_email="vhnz98@gmail.com",
     description="The complete Lossless and Hi-Res music downloader for Qobuz",
