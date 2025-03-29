@@ -17,6 +17,44 @@ from qobuz_dl.utils import get_album_artist, clean_filename
 from qobuz_dl.db import handle_download_id
 from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK, OK_MAX_CHARACTER_LENGTH
 
+def process_folder_format_with_subdirs(folder_format, attr_dict, path=None):
+    """
+    Process folder_format with subdirectories support.
+    First splits the path, applies formatting and cleaning to each part, then recombines.
+    
+    :param folder_format: Format string, may contain path separator '/'
+    :param attr_dict: Attribute dictionary for formatting
+    :param path: Base path, default is None
+    :return: Processed path
+    """
+    # Split path into parts
+    path_parts = folder_format.split('/')
+    
+    # Process each part individually
+    cleaned_parts = []
+    for part in path_parts:
+        if part:  # Skip empty parts
+            # Apply formatting with metadata
+            try:
+                formatted_part = part.format(**attr_dict)
+                # Clean filename without processing path separators
+                cleaned_part = sanitize_filepath(clean_filename(formatted_part), replacement_text="_")
+                cleaned_parts.append(cleaned_part)
+            except KeyError as e:
+                # If formatting fails, log error and use original part
+                logger.warning(f"{YELLOW}Format error ({e}), using original text.")
+                cleaned_part = sanitize_filepath(clean_filename(part), replacement_text="_")
+                cleaned_parts.append(cleaned_part)
+    
+    # Recombine into path
+    final_path = os.path.join(*cleaned_parts) if cleaned_parts else ""
+    
+    # If base path is provided, join with final path
+    if path and final_path:
+        return os.path.join(path, final_path)
+    
+    return final_path
+
 QL_DOWNGRADE = "FormatRestrictedByFormatAvailability"
 # used in case of error
 DEFAULT_FORMATS = {
@@ -122,8 +160,9 @@ class Download:
         # If the album track path exceeds 180 characters, use fallback formatting.
         self._determine_formats(album_meta=album_meta, album_attr=album_attr, tracks_meta=album_meta["tracks"]["items"],
                                 track_attr=None, is_track=False,file_format=file_format, settings=self.settings)
-        sanitized_title = sanitize_filepath(clean_filename(self.folder_format.format(**album_attr)), replacement_text="_")
-        dirn = os.path.join(self.path, sanitized_title)
+        
+        # Use new function to process paths with subdirectories
+        dirn = process_folder_format_with_subdirs(self.folder_format, album_attr, self.path)
         os.makedirs(dirn, exist_ok=True)
 
         if self.settings.no_cover:
@@ -208,9 +247,9 @@ class Download:
             # If the track path exceeds 180 characters, use fallback formatting.
             self._determine_formats(album_meta=track_meta.get("album", {}), album_attr=None, tracks_meta=[track_meta],
                                     track_attr=track_attr, is_track=True, file_format=file_format, settings=self.settings)
-            sanitized_title = sanitize_filepath(clean_filename(folder_format.format(**track_attr)), replacement_text="_")
-
-            dirn = os.path.join(self.path, sanitized_title)
+            
+            # Use new function to process paths with subdirectories
+            dirn = process_folder_format_with_subdirs(folder_format, track_attr, self.path)
             os.makedirs(dirn, exist_ok=True)
 
             if self.settings.no_cover:
@@ -449,9 +488,11 @@ class Download:
             try:
                 # Get cleaned folder path
                 if is_track:
-                    root_dir = sanitize_filepath(clean_filename(folder_fmt.format(**track_attr)), replacement_text="_")
+                    # Process folder_format that may contain subdirectories
+                    root_dir = process_folder_format_with_subdirs(folder_fmt, track_attr)
                 else:
-                    root_dir = sanitize_filepath(clean_filename(folder_fmt.format(**album_attr)), replacement_text="_")
+                    # Process folder_format that may contain subdirectories
+                    root_dir = process_folder_format_with_subdirs(folder_fmt, album_attr)
 
                 # Check complete path length for each track
                 for track_metadata in tracks_meta:

@@ -105,14 +105,18 @@ def add_common_arg(custom_parser, default_folder, default_quality):
         Note1: {album_title}, {track_title} will contain version information if available.
         Note2: {album_title_base}, {track_title_base} will contain only the title,
         Note3: {track_title}, {track_title_base} is only available if the given url is a track url.
-        Cannot contain characters used by the system, which includes /:<>""",
+        Note4: You can use '/' to create subdirectories, for example:
+        "{album_artist}/{album_artist} - {album_title} ({year})" will create
+        "Taylor Swift/Taylor Swift - folklore (2020)".
+        Cannot contain characters used by the system, which includes :<>""",
     )
     custom_parser.add_argument(
         "-fbff",
         "--fallback-folder-format",
         metavar="PATTERN", 
         help="""fallback pattern for formatting folder names when the main pattern fails.
-        Uses same keys as --folder-format. e.g: "{album_artist} - {album_title}" """,
+        Uses same keys as --folder-format. e.g: "{album_artist} - {album_title}"
+        Note: You can also use '/' to create subdirectories in the fallback pattern.""",
     )
     custom_parser.add_argument(
         "-tf",
