@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 pkg_name = "qobuz-dl"
 
@@ -21,12 +21,12 @@ requirements = [
 setup(
     name=pkg_name,
     version="1.0.9",
-    author="Vitiko",
-    author_email="vhnz98@gmail.com",
+    author="MattheousDT",
+    author_email="28923903+MattheousDT@users.noreply.github.com",
     description="The complete Lossless and Hi-Res music downloader for Qobuz",
     long_description=read_file("README.md"),
     long_description_content_type="text/markdown",
-    url="https://github.com/vitiko98/Qobuz-DL",
+    url="https://github.com/MattheousDT/qobuz-dl",
     install_requires=requirements,
     entry_points={
         "console_scripts": [

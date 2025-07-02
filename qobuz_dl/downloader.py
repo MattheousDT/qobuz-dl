@@ -1,21 +1,23 @@
+import concurrent.futures
 import logging
 import os
 import re
-from typing import Tuple
-import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
+from typing import Tuple
 
 import requests
 from pathvalidate import sanitize_filename, sanitize_filepath
 from tqdm import tqdm
 
 import qobuz_dl.metadata as metadata
-from qobuz_dl.color import OFF, GREEN, RED, YELLOW, CYAN
+from qobuz_dl.color import CYAN, GREEN, OFF, RED, YELLOW
+from qobuz_dl.constants import (DEFAULT_FOLDER, DEFAULT_MULTIPLE_DISC_TRACK,
+                                DEFAULT_TRACK, OK_MAX_CHARACTER_LENGTH)
+from qobuz_dl.db import handle_download_id
 from qobuz_dl.exceptions import NonStreamable
 from qobuz_dl.settings import QobuzDLSettings
-from qobuz_dl.utils import get_album_artist, clean_filename
-from qobuz_dl.db import handle_download_id
-from qobuz_dl.constants import DEFAULT_FOLDER, DEFAULT_TRACK, DEFAULT_MULTIPLE_DISC_TRACK, OK_MAX_CHARACTER_LENGTH
+from qobuz_dl.utils import clean_filename, get_album_artist
+
 
 def process_folder_format_with_subdirs(folder_format, attr_dict, path=None):
     """
@@ -226,7 +228,7 @@ class Download:
             track_title = _get_title(track_meta)
             artist = _safe_get(track_meta, "performer", "name")
             logger.info(f"\n{YELLOW}Downloading: {artist} - {track_title}")
-            url = track_meta("album", {}).get("url", "")
+            url = track_meta.get("album", {}).get("url", "")
             release_date = track_meta.get("release_date_original", "")
             format_info = self._get_format(track_meta, is_track_id=True, track_url_dict=parse)
             file_format, quality_met, bit_depth, sampling_rate = format_info
